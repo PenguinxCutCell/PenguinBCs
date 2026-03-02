@@ -1,5 +1,10 @@
 # PenguinBCs.jl
 
+[![In development documentation](https://img.shields.io/badge/docs-dev-blue.svg)](https://PenguinxCutCell.github.io/PenguinBCs.jl/dev)
+![CI](https://github.com/PenguinxCutCell/PenguinBCs.jl/workflows/CI/badge.svg)
+[![codecov](https://codecov.io/gh/PenguinxCutCell/PenguinBCs.jl/graph/badge.svg?token=Q50hXtjAKk)](https://codecov.io/gh/PenguinxCutCell/PenguinBCs.jl)
+
+
 `PenguinBCs.jl` provides lightweight boundary-condition and interface-condition types for PDE solvers in the PenguinxCutCell ecosystem.
 
 It focuses on two needs:
