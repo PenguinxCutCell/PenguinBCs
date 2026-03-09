@@ -28,6 +28,21 @@ end
     @test eval_bc((x, y, t) -> x + y + t, x, 0.1) == 3.1
 end
 
+@testset "Traction / outlet boundary types" begin
+    bc = BorderConditions(
+        ; left=Traction(SVector(1.0, 2.0)),
+        right=PressureOutlet(0.0),
+        bottom=DoNothing(),
+        top=Traction((x, y, t) -> SVector(x + t, y - t)),
+    )
+    @test validate_borderconditions!(bc, 2) === bc
+
+    x = SVector(0.2, 0.3)
+    @test eval_bc((bc.borders[:left]).value, x, 0.5) == SVector(1.0, 2.0)
+    @test eval_bc((bc.borders[:top]).value, x, 0.5) == SVector(0.7, -0.2)
+    @test eval_bc((PressureOutlet()).value, x, 0.0) == 0.0
+end
+
 @testset "InterfaceConditions" begin
     ic = InterfaceConditions(
         scalar=ScalarJump(1.0, 2.0, 0.5),

@@ -25,11 +25,27 @@ Supported boundary types:
 - `Neumann(value)`
 - `Robin(α, β, value)`
 - `Periodic()`
+- `Traction(value)`
+- `PressureOutlet(p_out)` or `PressureOutlet()`
+- `DoNothing()`
+- `Inflow(value)`
+- `Outflow()`
 
 `value`, `α`, and `β` can be:
 - A `Float64`
 - A function of space: `(x...) -> ...`
 - A function of space and time: `(x..., t) -> ...`
+
+Boundary-type intent:
+- `Dirichlet`: prescribed state value.
+- `Neumann`: prescribed normal derivative / scalar flux.
+- `Robin`: mixed state/flux condition.
+- `Periodic`: periodic side marker (must be paired with opposite side).
+- `Traction`: prescribed Cauchy traction vector/tensor contribution.
+- `PressureOutlet`: exterior pressure outlet (for Stokes, `σn = -p_out n`).
+- `DoNothing`: homogeneous traction (`σn = 0`).
+- `Inflow`: advection inflow marker with prescribed transported scalar.
+- `Outflow`: advection outflow marker with no imposed scalar data.
 
 `BorderConditions` stores boundary assignments by side symbol:
 - 1D: `:left`, `:right`
@@ -57,6 +73,16 @@ A concise mapping to common PDE notation:
   $\partial_n u = g$
 - Robin:
   $ \alpha u + \beta\,\partial_n u = g$
+- Traction:
+  $ \sigma n = \tau$
+- Pressure outlet:
+  $ \sigma n = -p_{\mathrm{out}} n$
+- Do-nothing:
+  $ \sigma n = 0$
+- Advection inflow:
+  $ \phi = g \text{ on } u\cdot n < 0$
+- Advection outflow:
+  no imposed scalar data on $u\cdot n \ge 0$
 - Scalar jump across interface \(\Gamma\):
   $\alpha_1 u_1 - \alpha_2 u_2 = g$
 - Flux jump across interface \(\Gamma\):
@@ -76,15 +102,41 @@ bc = BorderConditions(
 )
 validate_borderconditions!(bc, 2)
 
+# Additional boundary families
+bc_stokes = BorderConditions(
+    left   = Traction(SVector(1.0, 2.0)),
+    right  = PressureOutlet(0.0),
+    bottom = DoNothing(),
+    top    = Traction((x, y, t) -> SVector(x + t, y - t)),
+)
+validate_borderconditions!(bc_stokes, 2)
+
+bc_adv = BorderConditions(
+    left  = Inflow((x, t) -> 1 + x + t),
+    right = Outflow(),
+)
+validate_borderconditions!(bc_adv, 1)
+
 x = SVector(0.25, 0.75)
 t = 0.1
 val = eval_bc((x, y, t) -> x + y + t, x, t)
+traction_val = eval_bc((bc_stokes.borders[:top]).value, x, t)
 
 ic = InterfaceConditions(
     scalar = ScalarJump(1.0, 1.0, 0.0),
     flux   = FluxJump(1.0, 2.0, 0.0),
 )
 ```
+
+## Runtime Evaluation (`eval_bc`)
+
+`eval_bc(v, x, t)` supports:
+- constants: `v::Real`
+- spatial callbacks: `(x...) -> ...`
+- space-time callbacks: `(x..., t) -> ...`
+- vector-like values (returned as-is)
+
+`x` is passed as `StaticArrays.SVector` and expanded to scalar coordinates when calling callback-based values.
 
 ## Documentation
 

@@ -23,6 +23,28 @@ Robin (`Robin(\alpha, \beta, g)`):
 
 Periodic (`Periodic()`): opposite sides are constrained by periodic identification. `validate_borderconditions!(bc, N)` enforces that periodic sides are paired.
 
+Traction (`Traction(\tau)`):
+```math
+\sigma n = \tau \quad \text{on } \partial\Omega_T
+```
+
+Pressure outlet (`PressureOutlet(p_{\mathrm{out}})`): for Stokes solvers this maps to
+```math
+\sigma n = -p_{\mathrm{out}}\,n \quad \text{on } \partial\Omega_{\mathrm{out}}
+```
+
+Do-nothing (`DoNothing()`):
+```math
+\sigma n = 0 \quad \text{on } \partial\Omega_0
+```
+
+Advection inflow (`Inflow(g)`, where `u\cdot n < 0`): impose transported scalar value
+```math
+\phi = g \quad \text{on inflow boundary}
+```
+
+Advection outflow (`Outflow()`, where `u\cdot n \ge 0`): no scalar data is imposed at the boundary.
+
 ## Interface Conditions
 
 Let `\Gamma` be an interior interface with traces `(\cdot)_1` and `(\cdot)_2` on each side.

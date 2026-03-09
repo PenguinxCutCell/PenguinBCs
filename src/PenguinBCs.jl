@@ -2,7 +2,7 @@ module PenguinBCs
 
 using StaticArrays
 
-export AbstractBoundary, Dirichlet, Neumann, Robin, Periodic, Inflow, Outflow, BorderConditions, validate_borderconditions!
+export AbstractBoundary, Dirichlet, Neumann, Robin, Periodic, Traction, PressureOutlet, DoNothing, Inflow, Outflow, BorderConditions, validate_borderconditions!
 export AbstractInterfaceBC, ScalarJump, FluxJump, RobinJump, InterfaceConditions
 export eval_bc
 
@@ -38,6 +38,28 @@ end
 Periodic boundary marker.
 """
 struct Periodic <: AbstractBoundary end
+
+"""
+Prescribed Cauchy traction boundary condition `σn = value`.
+"""
+struct Traction{T} <: AbstractBoundary
+    value::T
+end
+
+"""
+Pressure-outlet boundary condition with exterior pressure `p_out`.
+
+For Stokes solvers this maps to `σn = -p_out n`.
+"""
+struct PressureOutlet{T} <: AbstractBoundary
+    value::T
+end
+PressureOutlet() = PressureOutlet(0.0)
+
+"""
+Homogeneous traction boundary condition `σn = 0`.
+"""
+struct DoNothing <: AbstractBoundary end
 
 """
 Advection inflow boundary condition `u⋅n < 0`: impose transported scalar value.
@@ -88,12 +110,6 @@ function _side_pairs(N::Int)
     throw(ArgumentError("unsupported dimension N=$N; expected 1, 2, or 3"))
 end
 
-"""
-Validate periodic side pairing for [`BorderConditions`](@ref) in dimension `N`.
-
-Supported dimensions are `1`, `2`, and `3`. Opposite sides must both be periodic
-or both non-periodic.
-"""
 function _validate_periodic_pairing!(borders, N)
     pairs = _side_pairs(N)
     for (lo, hi) in pairs
@@ -108,6 +124,12 @@ function _validate_periodic_pairing!(borders, N)
     return nothing
 end
 
+"""
+Validate periodic side pairing for [`BorderConditions`](@ref) in dimension `N`.
+
+Supported dimensions are `1`, `2`, and `3`. Opposite sides must both be periodic
+or both non-periodic.
+"""
 function validate_borderconditions!(bc::BorderConditions, N)
     _validate_periodic_pairing!(bc.borders, N)
     return bc

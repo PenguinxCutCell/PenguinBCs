@@ -5,7 +5,7 @@
 ## Scope
 
 The package provides:
-- Boundary-condition types: `Dirichlet`, `Neumann`, `Robin`, `Periodic`
+- Boundary-condition types: `Dirichlet`, `Neumann`, `Robin`, `Periodic`, `Traction`, `PressureOutlet`, `DoNothing`, `Inflow`, `Outflow`
 - Interface-condition types: `ScalarJump`, `FluxJump`, `RobinJump`
 - Condition containers: `BorderConditions`, `InterfaceConditions`
 - Evaluation helper: `eval_bc`
