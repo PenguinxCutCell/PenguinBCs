@@ -73,3 +73,12 @@ end
     @test eval_bc(gt_cb.capillary, x, t) ≈ 0.4
     @test eval_bc(gt_cb.kinetic, x, t) ≈ 0.42
 end
+
+@testset "AlloyEquilibrium construction" begin
+    ic = AlloyEquilibrium(0.3, 1.2, -0.8)
+    @test ic isa AlloyEquilibrium
+    @test ic isa AbstractInterfaceBC
+    @test ic.k_partition == 0.3
+    @test ic.T_m == 1.2
+    @test ic.m_liquidus == -0.8
+end

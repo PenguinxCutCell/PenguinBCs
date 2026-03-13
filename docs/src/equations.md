@@ -65,6 +65,14 @@ Robin-type jump (`RobinJump(\alpha, \beta, g)`):
 ```
 where `[q] := q_1 - q_2`.
 
+Binary-alloy equilibrium descriptor (`AlloyEquilibrium(k, T_m, m)`):
+```math
+C_{s\Gamma} = k\,C_{l\Gamma}
+```
+```math
+T_\Gamma = T_m + m\,C_{l\Gamma}
+```
+
 ## Runtime Evaluation Semantics
 
 For all coefficients/values, `eval_bc` supports:

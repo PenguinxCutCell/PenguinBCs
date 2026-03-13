@@ -3,7 +3,7 @@ module PenguinBCs
 using StaticArrays
 
 export AbstractBoundary, Dirichlet, Neumann, Robin, Periodic, Traction, PressureOutlet, DoNothing, Symmetry, Inflow, Outflow, BorderConditions, validate_borderconditions!
-export AbstractInterfaceBC, ScalarJump, FluxJump, RobinJump, GibbsThomson, InterfaceConditions
+export AbstractInterfaceBC, ScalarJump, FluxJump, RobinJump, GibbsThomson, AlloyEquilibrium, InterfaceConditions
 export eval_bc
 
 """
@@ -194,6 +194,20 @@ struct GibbsThomson <: AbstractInterfaceBC
 end
 
 GibbsThomson(capillary; kinetic=0.0) = GibbsThomson(capillary, kinetic)
+
+"""
+Alloy equilibrium interface descriptor for binary-alloy sharp-interface models.
+
+Stored coefficients:
+- `k_partition`: partition ratio `C_{s\\Gamma} = k\\,C_{l\\Gamma}`
+- `T_m`: reference melting temperature
+- `m_liquidus`: liquidus slope in `T_\\Gamma = T_m + m\\,C_{l\\Gamma}`
+"""
+struct AlloyEquilibrium{Tk,Tm} <: AbstractInterfaceBC
+    k_partition::Tk
+    T_m::Tm
+    m_liquidus::Tm
+end
 
 """
 Container for scalar and flux interface conditions.

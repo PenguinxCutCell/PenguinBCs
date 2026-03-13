@@ -71,6 +71,12 @@ Supported interface jump conditions:
 - `kinetic`: kinetic velocity coefficient
 - Imposes a modified temperature on the interface from `Robin(1.0, 0.0, Tm)` with `TΓ = Tm - capillary*κΓ - kinetic*VΓ`
 
+- `AlloyEquilibrium(k_partition, T_m, m_liquidus)`
+`AlloyEquilibrium(k_partition, T_m, m_liquidus)` stores binary alloy equilibrium interface conditions:
+- `k_partition`: partition coefficient \(C_{s\Gamma} = k\,C_{l\Gamma}\)
+- `T_m`: melting temperature
+- `m_liquidus`: liquidus slope \(T_\Gamma = T_m + m\,C_{l\Gamma}\)
+
 ## Equations
 
 A concise mapping to common PDE notation:
@@ -95,6 +101,9 @@ A concise mapping to common PDE notation:
   $\alpha_1 u_1 - \alpha_2 u_2 = g$
 - Flux jump across interface \(\Gamma\):
   $\beta_1\,\partial_n u_1 - \beta_2\,\partial_n u_2 = g$
+- Binary-alloy equilibrium interface:
+  $C_{s\Gamma} = k\,C_{l\Gamma}$
+  $T_\Gamma = T_m + m\,C_{l\Gamma}$
 
 ## Quick Example
 
@@ -134,6 +143,8 @@ ic = InterfaceConditions(
     scalar = ScalarJump(1.0, 1.0, 0.0),
     flux   = FluxJump(1.0, 2.0, 0.0),
 )
+
+alloy_ic = AlloyEquilibrium(0.2, 0.0, -0.5)
 ```
 
 ## Runtime Evaluation (`eval_bc`)
