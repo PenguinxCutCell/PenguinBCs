@@ -73,6 +73,19 @@ C_{s\Gamma} = k\,C_{l\Gamma}
 T_\Gamma = T_m + m\,C_{l\Gamma}
 ```
 
+Gibbs-Thomson descriptor (`GibbsThomson(\sigma_0; kinetic=\mu_0, ...)`):
+```math
+T_\Gamma = T_m - \sigma_{\mathrm{eff}}\,\kappa_\Gamma - \mu_{\mathrm{eff}}\,V_\Gamma
+```
+with optional 2D harmonic anisotropy factors from `HarmonicAnisotropy(\epsilon; m, \theta_0)`:
+```math
+A(\theta) = 1 + \epsilon \cos\!\big(m(\theta-\theta_0)\big)
+```
+and (for capillarity when stiffness is enabled):
+```math
+A_{\mathrm{stiff}}(\theta) = 1 + \epsilon(1-m^2)\cos\!\big(m(\theta-\theta_0)\big).
+```
+
 ## Runtime Evaluation Semantics
 
 For all coefficients/values, `eval_bc` supports:

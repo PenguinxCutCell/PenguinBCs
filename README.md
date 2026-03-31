@@ -65,11 +65,16 @@ Supported interface jump conditions:
 
 ## Esoteric BC's/IC's
 
-- `GibbsThomson(capillary; kinetic=0.0)`
-`GibbsThomson(capillary; kinetic=0.0)` stores isotropic Gibbs-Thomson correction terms:
+- `HarmonicAnisotropy(ϵ; m=4, θ0=0.0, use_stiffness=true)`
+stores a 2D harmonic anisotropy descriptor used by Gibbs-Thomson laws.
+
+- `GibbsThomson(capillary; kinetic=0.0, capillary_anisotropy=nothing, kinetic_anisotropy=nothing)`
+stores Gibbs-Thomson correction terms:
 - `capillary`: curvature coefficient
 - `kinetic`: kinetic velocity coefficient
-- Imposes a modified temperature on the interface from `Robin(1.0, 0.0, Tm)` with `TΓ = Tm - capillary*κΓ - kinetic*VΓ`
+- optional `capillary_anisotropy`: `HarmonicAnisotropy`
+- optional `kinetic_anisotropy`: `HarmonicAnisotropy`
+- Imposes a modified temperature on the interface from `Robin(1.0, 0.0, Tm)` with `TΓ = Tm - capillary_eff*κΓ - kinetic_eff*VΓ`
 
 - `AlloyEquilibrium(k_partition, T_m, m_liquidus)`
 `AlloyEquilibrium(k_partition, T_m, m_liquidus)` stores binary alloy equilibrium interface conditions:
@@ -145,6 +150,10 @@ ic = InterfaceConditions(
 )
 
 alloy_ic = AlloyEquilibrium(0.2, 0.0, -0.5)
+
+aniso_cap = HarmonicAnisotropy(0.03; m=4, θ0=0.0, use_stiffness=true)
+aniso_kin = HarmonicAnisotropy((x, y, t) -> 0.01; m=4, θ0=(x, y, t) -> 0.0, use_stiffness=false)
+gt_aniso = GibbsThomson(0.2; kinetic=0.01, capillary_anisotropy=aniso_cap, kinetic_anisotropy=aniso_kin)
 ```
 
 ## Runtime Evaluation (`eval_bc`)

@@ -24,6 +24,7 @@ AbstractInterfaceBC
 ScalarJump
 FluxJump
 RobinJump
+HarmonicAnisotropy
 GibbsThomson
 AlloyEquilibrium
 InterfaceConditions

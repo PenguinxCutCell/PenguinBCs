@@ -7,6 +7,7 @@
 The package provides:
 - Boundary-condition types: `Dirichlet`, `Neumann`, `Robin`, `Periodic`, `Traction`, `PressureOutlet`, `DoNothing`, `Inflow`, `Outflow`
 - Interface-condition types: `ScalarJump`, `FluxJump`, `RobinJump`, `AlloyEquilibrium`
+- Gibbs-Thomson support: `GibbsThomson` with optional `HarmonicAnisotropy`
 - Condition containers: `BorderConditions`, `InterfaceConditions`
 - Evaluation helper: `eval_bc`
 

@@ -66,12 +66,40 @@ end
     gt = GibbsThomson(0.25; kinetic=0.05)
     @test gt.capillary == 0.25
     @test gt.kinetic == 0.05
+    @test gt.capillary_anisotropy === nothing
+    @test gt.kinetic_anisotropy === nothing
 
     gt_cb = GibbsThomson((x, y, t) -> 0.1 + x; kinetic=(x, y, t) -> 0.02 + t)
     x = SVector(0.3, 0.7)
     t = 0.4
     @test eval_bc(gt_cb.capillary, x, t) ≈ 0.4
     @test eval_bc(gt_cb.kinetic, x, t) ≈ 0.42
+end
+
+@testset "GibbsThomson anisotropy descriptors" begin
+    cap_aniso = HarmonicAnisotropy(0.03)
+    @test cap_aniso.m == 4
+    @test cap_aniso.use_stiffness
+    @test cap_aniso.θ0 == 0.0
+    x = SVector(0.2, -0.1)
+    t = 0.5
+    @test eval_bc(cap_aniso.ϵ, x, t) ≈ 0.03
+
+    kin_aniso = HarmonicAnisotropy((x, y, t) -> 0.01 + x; m=6, θ0=(x, y, t) -> t, use_stiffness=false)
+    @test kin_aniso.m == 6
+    @test !kin_aniso.use_stiffness
+    @test eval_bc(kin_aniso.ϵ, x, t) ≈ 0.21
+    @test eval_bc(kin_aniso.θ0, x, t) ≈ 0.5
+
+    gt = GibbsThomson(
+        0.2;
+        kinetic=0.01,
+        capillary_anisotropy=cap_aniso,
+        kinetic_anisotropy=kin_aniso,
+    )
+    @test gt.capillary_anisotropy === cap_aniso
+    @test gt.kinetic_anisotropy === kin_aniso
+    @test_throws ArgumentError HarmonicAnisotropy(0.1; m=0)
 end
 
 @testset "AlloyEquilibrium construction" begin

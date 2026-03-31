@@ -3,7 +3,7 @@ module PenguinBCs
 using StaticArrays
 
 export AbstractBoundary, Dirichlet, Neumann, Robin, Periodic, Traction, PressureOutlet, DoNothing, Symmetry, Inflow, Outflow, BorderConditions, validate_borderconditions!
-export AbstractInterfaceBC, ScalarJump, FluxJump, RobinJump, GibbsThomson, AlloyEquilibrium, InterfaceConditions
+export AbstractInterfaceBC, ScalarJump, FluxJump, RobinJump, HarmonicAnisotropy, GibbsThomson, AlloyEquilibrium, InterfaceConditions
 export eval_bc
 
 """
@@ -179,21 +179,63 @@ struct RobinJump <: AbstractInterfaceBC
 end
 
 """
-Isotropic Gibbs-Thomson thermodynamic correction used by Stefan solvers.
+2D harmonic anisotropy descriptor for Gibbs-Thomson coefficients.
 
-This stores only correction coefficients:
+Stored parameters:
+- `ϵ`: anisotropy amplitude (scalar or callback)
+- `m`: symmetry fold (`m=4` by default)
+- `θ0`: orientation offset angle (scalar or callback)
+- `use_stiffness`: when `true`, Stefan may use stiffness correction
+  `1 + ϵ(1-m^2)cos(m(θ-θ0))` for capillarity.
+"""
+struct HarmonicAnisotropy
+    ϵ::Union{Function,Float64}
+    m::Int
+    θ0::Union{Function,Float64}
+    use_stiffness::Bool
+end
+
+function HarmonicAnisotropy(
+    ϵ;
+    m::Int=4,
+    θ0=0.0,
+    use_stiffness::Bool=true,
+)
+    m > 0 || throw(ArgumentError("HarmonicAnisotropy requires m > 0"))
+    return HarmonicAnisotropy(ϵ, m, θ0, use_stiffness)
+end
+
+"""
+Gibbs-Thomson thermodynamic correction used by Stefan solvers.
+
+Base isotropic coefficients:
 - `capillary`: curvature coefficient `σ_κ`
 - `kinetic`: kinetic coefficient `μ_Γ`
 
+Optional 2D harmonic anisotropy descriptors:
+- `capillary_anisotropy`
+- `kinetic_anisotropy`
+
 The complete interface law is applied by Stefan code as:
-`TΓ = Tm - capillary*κΓ - kinetic*VΓ`.
+`TΓ = Tm - capillary_eff*κΓ - kinetic_eff*VΓ`.
 """
 struct GibbsThomson <: AbstractInterfaceBC
     capillary::Union{Function,Float64}
     kinetic::Union{Function,Float64}
+    capillary_anisotropy::Union{Nothing,HarmonicAnisotropy}
+    kinetic_anisotropy::Union{Nothing,HarmonicAnisotropy}
 end
 
-GibbsThomson(capillary; kinetic=0.0) = GibbsThomson(capillary, kinetic)
+GibbsThomson(capillary, kinetic) = GibbsThomson(capillary; kinetic=kinetic)
+
+function GibbsThomson(
+    capillary;
+    kinetic=0.0,
+    capillary_anisotropy::Union{Nothing,HarmonicAnisotropy}=nothing,
+    kinetic_anisotropy::Union{Nothing,HarmonicAnisotropy}=nothing,
+)
+    return GibbsThomson(capillary, kinetic, capillary_anisotropy, kinetic_anisotropy)
+end
 
 """
 Alloy equilibrium interface descriptor for binary-alloy sharp-interface models.
